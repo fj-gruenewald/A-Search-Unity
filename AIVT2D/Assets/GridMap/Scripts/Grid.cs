@@ -15,8 +15,8 @@ public class Grid<TGridObject>
     private TGridObject[,] gridArray;
 
     //Events für das ändern von Werten im Grid
-    public event EventHandler<OnGridValueChangedEventArgs> OnGridVlaueChanged;
-    public class OnGridValueChangedEventArgs : EventArgs
+    public event EventHandler<OnGridObjectChangedEventArgs> OnGridObjectChanged;
+    public class OnGridObjectChangedEventArgs : EventArgs
     {
         public int x;
         public int y;
@@ -43,7 +43,7 @@ public class Grid<TGridObject>
         }
 
         //Debug 
-        bool showDebug = true;
+        bool showDebug = false;
         if (showDebug)
         {
             TextMesh[,] debugTextArray = new TextMesh[width, height];
@@ -71,7 +71,7 @@ public class Grid<TGridObject>
             Debug.DrawLine(GetWorldPosition(width, 0), GetWorldPosition(width, height), Color.white, 100f);
 
             //
-            OnGridVlaueChanged += (object sender, OnGridValueChangedEventArgs eventArgs) =>
+            OnGridObjectChanged += (object sender, OnGridObjectChangedEventArgs eventArgs) =>
             {
                 debugTextArray[eventArgs.x, eventArgs.y].text = gridArray[eventArgs.x, eventArgs.y]?.ToString();
             };
@@ -85,14 +85,32 @@ public class Grid<TGridObject>
         }
     }
 
+    //Node Breite
+    public int GetWidth()
+    {
+        return width;
+    }
+
+    //Node Höhe
+    public int GetHeight()
+    {
+        return height;
+    }
+
+    //Node Zellengröße
+    public float GetCellSize()
+    {
+        return cellSize;
+    }
+
     //Konvertieren von X und Y in eine Welt Position
-    private UnityEngine.Vector3 GetWorldPosition(int x, int y)
+    public UnityEngine.Vector3 GetWorldPosition(int x, int y)
     {
         return new UnityEngine.Vector3(x, y) * cellSize + originPosition;
     }
 
     //XY für einen bestimmten Vector3 der Welt Position
-    private void GetXY(UnityEngine.Vector3 worldPosition, out int x, out int y)
+    public void GetXY(UnityEngine.Vector3 worldPosition, out int x, out int y)
     {
         x = Mathf.FloorToInt((worldPosition - originPosition).x / cellSize);
         y = Mathf.FloorToInt((worldPosition - originPosition).y / cellSize);
@@ -105,14 +123,14 @@ public class Grid<TGridObject>
         if (x >= 0 && y >= 0 && x < width && y < height)
         {
             gridArray[x, y] = value;
-            if (OnGridVlaueChanged != null) OnGridVlaueChanged(this, new OnGridValueChangedEventArgs { x = x, y = y });
+            if (OnGridObjectChanged != null) OnGridObjectChanged(this, new OnGridObjectChangedEventArgs { x = x, y = y });
         }
     }
 
     //Event zum ändern von Grid Objects (Grid Values)
     public void TriggerGridObjectChanged(int x, int y)
     {
-        if (OnGridVlaueChanged != null) OnGridVlaueChanged(this, new OnGridValueChangedEventArgs { x = x, y = y });
+        if (OnGridObjectChanged != null) OnGridObjectChanged(this, new OnGridObjectChangedEventArgs { x = x, y = y });
     }
 
     //Funktion zum ändern der Grid Value durch Mausklick

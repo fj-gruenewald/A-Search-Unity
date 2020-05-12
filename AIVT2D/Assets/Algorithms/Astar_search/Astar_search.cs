@@ -16,13 +16,19 @@ public class Astar_search
     private List<PathNode> openList;
     private List<PathNode> closedList;
 
-    //
+    //Konstruktor für A* Suche
     public Astar_search(int width, int height)
     {
         grid = new Grid<PathNode>(width, height, 10f, Vector3.zero, (Grid<PathNode> grid, int x, int y) => new PathNode(grid, x, y));
     }
 
-    private List<PathNode> FindPath(int startX, int startY, int endX, int endY)
+    //
+    public Grid<PathNode> GetGrid()
+    {
+        return grid;
+    }
+
+    public List<PathNode> FindPath(int startX, int startY, int endX, int endY)
     {
         //Start- Endpunkt
         PathNode startNode = grid.GetGridObject(startX, startY);
@@ -39,7 +45,7 @@ public class Astar_search
             {
                 //Kosten setzten
                 PathNode pathNode = grid.GetGridObject(x, y);
-                pathNode.gCost = int.MaxValue;
+                pathNode.gCost = 99999999;
                 pathNode.CalculateFCost();
 
                 // Keine Daten von vorherigen Path übernehmen
@@ -53,7 +59,7 @@ public class Astar_search
         startNode.CalculateFCost();
 
         //Suchzyklus
-        while(openList.Count > 0)
+        while (openList.Count > 0)
         {
             PathNode currentNode = GetLowestFCostNode(openList);
             if(currentNode == endNode)
@@ -65,45 +71,86 @@ public class Astar_search
             //Punkt ist nicht Endpunkt
             openList.Remove(currentNode);
             closedList.Add(currentNode);
+
+            //Nachbaren verarbeiten
+            foreach (PathNode neighbourNode in GetNeighbourList(currentNode))
+            {
+                if (closedList.Contains(neighbourNode)) continue;
+                if (!neighbourNode.isWalkable)
+                {
+                    closedList.Add(neighbourNode);
+                    continue;
+                }
+
+                int tentativeGCost = currentNode.gCost + CalculateDistanceCost(currentNode, neighbourNode);
+                if (tentativeGCost < neighbourNode.gCost)
+                {
+                    neighbourNode.cameFromNode = currentNode;
+                    neighbourNode.gCost = tentativeGCost;
+                    neighbourNode.hCost = CalculateDistanceCost(neighbourNode, endNode);
+                    neighbourNode.CalculateFCost();
+
+                    if (!openList.Contains(neighbourNode))
+                    {
+                        openList.Add(neighbourNode);
+                    }
+                }
+            }
         }
 
+        // OpenList ist leer
+        return null;
     }
 
     //Nachbarn abrufen
     private List<PathNode> GetNeighbourList(PathNode currentNode)
     {
         List<PathNode> neighbourList = new List<PathNode>();
-        //Linke Seite
-        if(currentNode.x - 1 >= 0)
+        if (currentNode.x - 1 >= 0)
         {
+            // Links
             neighbourList.Add(GetNode(currentNode.x - 1, currentNode.y));
+            // Links Unten
+            if (currentNode.y - 1 >= 0) neighbourList.Add(GetNode(currentNode.x - 1, currentNode.y - 1));
+            // Links Oben
+            if (currentNode.y + 1 < grid.GetHeight()) neighbourList.Add(GetNode(currentNode.x - 1, currentNode.y + 1));
         }
-
-        //Rechte Seite
         if (currentNode.x + 1 < grid.GetWidth())
         {
-
+            // Rechts
+            neighbourList.Add(GetNode(currentNode.x + 1, currentNode.y));
+            // Rechts Unten
+            if (currentNode.y - 1 >= 0) neighbourList.Add(GetNode(currentNode.x + 1, currentNode.y - 1));
+            // Rechts Oben
+            if (currentNode.y + 1 < grid.GetHeight()) neighbourList.Add(GetNode(currentNode.x + 1, currentNode.y + 1));
         }
-
-        //Unten
-        if (currentNode.y - 1 >= 0)
-        {
-            neighbourList.Add(GetNode)
-        }
-
-        //Oben
-        if (currentNode.y + 1 < grid.GetHeight())
-        {
-            neighbourList.Add(GetNode)
-        }
+        // Unten
+        if (currentNode.y - 1 >= 0) neighbourList.Add(GetNode(currentNode.x, currentNode.y - 1));
+        // Oben
+        if (currentNode.y + 1 < grid.GetHeight()) neighbourList.Add(GetNode(currentNode.x, currentNode.y + 1));
 
         return neighbourList;
     }
 
-    //
+    //Aktuellen Node bekommen
+    public PathNode GetNode(int x, int y)
+    {
+        return grid.GetGridObject(x, y);
+    }
+
+    //Calculate Path
     private List<PathNode> CalculatePath(PathNode endNode)
     {
-        return null;
+        List<PathNode> path = new List<PathNode>();
+        path.Add(endNode);
+        PathNode currentNode = endNode;
+        while (currentNode.cameFromNode != null)
+        {
+            path.Add(currentNode.cameFromNode);
+            currentNode = currentNode.cameFromNode;
+        }
+        path.Reverse();
+        return path;
     }
 
     //hKosten Berechnen

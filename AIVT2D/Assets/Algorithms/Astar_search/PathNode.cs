@@ -6,13 +6,16 @@ public class PathNode
 {
     //Variablen
     private Grid<PathNode> grid;
-    private int x;
-    private int y;
+    public int x;
+    public int y;
 
     //Variablen für Kosten
     public int gCost;
     public int hCost;
     public int fCost;
+
+    //Ist es eine Wand
+    public bool isWalkable;
 
     //Von welcher Node ist man gekommen
     public PathNode cameFromNode;
@@ -23,12 +26,20 @@ public class PathNode
         this.grid = grid;
         this.x = x;
         this.y = y;
+        isWalkable = true;
     }
 
     //fKosten berechnen
     public void CalculateFCost()
     {
         fCost = gCost + hCost;
+    }
+
+    //Nodes über die gelaufen werden kann
+    public void SetIsWalkable(bool isWalkable)
+    {
+        this.isWalkable = isWalkable;
+        grid.TriggerGridObjectChanged(x, y);
     }
 
     //Koordinaten in den Nodes Anzeigen
