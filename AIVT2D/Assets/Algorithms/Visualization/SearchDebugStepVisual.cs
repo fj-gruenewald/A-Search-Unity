@@ -22,7 +22,7 @@ public class SearchDebugStepVisual : MonoBehaviour {
         gridSnapshotActionList = new List<GridSnapshotAction>();
     }
 
-    public void Setup(Grid<PathNode> grid) {
+    public void Setup(Grid<AstarPathNode> grid) {
         visualNodeArray = new Transform[grid.GetWidth(), grid.GetHeight()];
 
         for (int x = 0; x < grid.GetWidth(); x++) {
@@ -70,13 +70,13 @@ public class SearchDebugStepVisual : MonoBehaviour {
         gridSnapshotActionList.Clear();
     }
 
-    public void TakeSnapshot(Grid<PathNode> grid, PathNode current, List<PathNode> openList, List<PathNode> closedList) {
+    public void TakeSnapshot(Grid<AstarPathNode> grid, AstarPathNode current, List<AstarPathNode> openList, List<AstarPathNode> closedList) {
         GridSnapshotAction gridSnapshotAction = new GridSnapshotAction();
         gridSnapshotAction.AddAction(HideNodeVisuals);
         
         for (int x = 0; x < grid.GetWidth(); x++) {
             for (int y = 0; y < grid.GetHeight(); y++) {
-                PathNode pathNode = grid.GetGridObject(x, y);
+                AstarPathNode pathNode = grid.GetGridObject(x, y);
 
                 int gCost = pathNode.gCost;
                 int hCost = pathNode.hCost;
@@ -112,13 +112,13 @@ public class SearchDebugStepVisual : MonoBehaviour {
         gridSnapshotActionList.Add(gridSnapshotAction);
     }
 
-    public void TakeSnapshotFinalPath(Grid<PathNode> grid, List<PathNode> path) {
+    public void TakeSnapshotFinalPath(Grid<AstarPathNode> grid, List<AstarPathNode> path) {
         GridSnapshotAction gridSnapshotAction = new GridSnapshotAction();
         gridSnapshotAction.AddAction(HideNodeVisuals);
         
         for (int x = 0; x < grid.GetWidth(); x++) {
             for (int y = 0; y < grid.GetHeight(); y++) {
-                PathNode pathNode = grid.GetGridObject(x, y);
+                AstarPathNode pathNode = grid.GetGridObject(x, y);
 
                 int gCost = pathNode.gCost;
                 int hCost = pathNode.hCost;

@@ -11,19 +11,19 @@ public class Astar_search {
     public static Astar_search Instance { get; private set; }
 
     //Grid Erstellen
-    private Grid<PathNode> grid;
+    private Grid<AstarPathNode> grid;
 
     //Listen
-    private List<PathNode> openList;
-    private List<PathNode> closedList;
+    private List<AstarPathNode> openList;
+    private List<AstarPathNode> closedList;
 
     //Konstruktor für A* Suche
     public Astar_search(int width, int height) {
         Instance = this;
-        grid = new Grid<PathNode>(width, height, 10f, Vector3.zero, (Grid<PathNode> g, int x, int y) => new PathNode(g, x, y));
+        grid = new Grid<AstarPathNode>(width, height, 10f, Vector3.zero, (Grid<AstarPathNode> g, int x, int y) => new AstarPathNode(g, x, y));
     }
 
-    public Grid<PathNode> GetGrid() {
+    public Grid<AstarPathNode> GetGrid() {
         return grid;
     }
 
@@ -31,23 +31,23 @@ public class Astar_search {
         grid.GetXY(startWorldPosition, out int startX, out int startY);
         grid.GetXY(endWorldPosition, out int endX, out int endY);
 
-        List<PathNode> path = FindPath(startX, startY, endX, endY);
+        List<AstarPathNode> path = FindPath(startX, startY, endX, endY);
         if (path == null) {
             return null;
         } else {
             List<Vector3> vectorPath = new List<Vector3>();
-            foreach (PathNode pathNode in path) {
+            foreach (AstarPathNode pathNode in path) {
                 vectorPath.Add(new Vector3(pathNode.x, pathNode.y) * grid.GetCellSize() + Vector3.one * grid.GetCellSize() * .5f);
             }
             return vectorPath;
         }
     }
 
-    public List<PathNode> FindPath(int startX, int startY, int endX, int endY) {
+    public List<AstarPathNode> FindPath(int startX, int startY, int endX, int endY) {
 
         //Start- Endpunkt
-        PathNode startNode = grid.GetGridObject(startX, startY);
-        PathNode endNode = grid.GetGridObject(endX, endY);
+        AstarPathNode startNode = grid.GetGridObject(startX, startY);
+        AstarPathNode endNode = grid.GetGridObject(endX, endY);
 
         if (startNode == null || endNode == null) {
             // Invalid Path
@@ -55,15 +55,15 @@ public class Astar_search {
         }
 
         //Punkte setzten
-        openList = new List<PathNode> { startNode };
-        closedList = new List<PathNode>();
+        openList = new List<AstarPathNode> { startNode };
+        closedList = new List<AstarPathNode>();
 
         //Durch alle Punkte gehen (g kosten unendlich, f kosten)
         for (int x = 0; x < grid.GetWidth(); x++) {
             for (int y = 0; y < grid.GetHeight(); y++) {
 
                 //Kosten setzten
-                PathNode pathNode = grid.GetGridObject(x, y);
+                AstarPathNode pathNode = grid.GetGridObject(x, y);
                 pathNode.gCost = 99999999;
                 pathNode.CalculateFCost();
 
@@ -82,7 +82,7 @@ public class Astar_search {
 
         //Suchzyklus
         while (openList.Count > 0) {
-            PathNode currentNode = GetLowestFCostNode(openList);
+            AstarPathNode currentNode = GetLowestFCostNode(openList);
             if (currentNode == endNode) {
                 // Reached final node
                 SearchDebugStepVisual.Instance.TakeSnapshot(grid, currentNode, openList, closedList);
@@ -97,7 +97,7 @@ public class Astar_search {
             closedList.Add(currentNode);
 
             //Nachbaren verarbeiten
-            foreach (PathNode neighbourNode in GetNeighbourList(currentNode)) {
+            foreach (AstarPathNode neighbourNode in GetNeighbourList(currentNode)) {
                 if (closedList.Contains(neighbourNode)) continue;
                 if (!neighbourNode.isWalkable) {
                     closedList.Add(neighbourNode);
@@ -124,8 +124,8 @@ public class Astar_search {
     }
 
     //Nachbarn abrufen
-    private List<PathNode> GetNeighbourList(PathNode currentNode) {
-        List<PathNode> neighbourList = new List<PathNode>();
+    private List<AstarPathNode> GetNeighbourList(AstarPathNode currentNode) {
+        List<AstarPathNode> neighbourList = new List<AstarPathNode>();
 
         if (currentNode.x - 1 >= 0) {
             //Links
@@ -152,15 +152,15 @@ public class Astar_search {
     }
 
     //Aktuellen Node bekommen
-    public PathNode GetNode(int x, int y) {
+    public AstarPathNode GetNode(int x, int y) {
         return grid.GetGridObject(x, y);
     }
 
     //Calculate Path
-    private List<PathNode> CalculatePath(PathNode endNode) {
-        List<PathNode> path = new List<PathNode>();
+    private List<AstarPathNode> CalculatePath(AstarPathNode endNode) {
+        List<AstarPathNode> path = new List<AstarPathNode>();
         path.Add(endNode);
-        PathNode currentNode = endNode;
+        AstarPathNode currentNode = endNode;
         while (currentNode.cameFromNode != null) {
             path.Add(currentNode.cameFromNode);
             currentNode = currentNode.cameFromNode;
@@ -170,7 +170,7 @@ public class Astar_search {
     }
 
     //hKosten Berechnen
-    private int CalculateDistanceCost(PathNode a, PathNode b) {
+    private int CalculateDistanceCost(AstarPathNode a, AstarPathNode b) {
         int xDistance = Mathf.Abs(a.x - b.x);
         int yDistance = Mathf.Abs(a.y - b.y);
         int remaining = Mathf.Abs(xDistance - yDistance);
@@ -178,10 +178,10 @@ public class Astar_search {
     }
 
     //CurrentNode berechnen (openList mit geringsten Kosten => Startpunkt ...)
-    private PathNode GetLowestFCostNode(List<PathNode> pathNodeList) {
+    private AstarPathNode GetLowestFCostNode(List<AstarPathNode> pathNodeList) {
 
         //Punkt mit den niedrigsten Kosten wählen
-        PathNode lowestFCostNode = pathNodeList[0];
+        AstarPathNode lowestFCostNode = pathNodeList[0];
         for (int i = 1; i < pathNodeList.Count; i++) {
             if (pathNodeList[i].fCost < lowestFCostNode.fCost) {
                 lowestFCostNode = pathNodeList[i];
@@ -189,5 +189,8 @@ public class Astar_search {
         }
         return lowestFCostNode;
     }
+
+    //Breitensuche durchführen
+
 
 }

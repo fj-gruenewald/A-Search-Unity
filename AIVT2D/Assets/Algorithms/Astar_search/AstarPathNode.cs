@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PathNode {
+public class AstarPathNode {
 
     //Variablen
-    private Grid<PathNode> grid;
+    private Grid<AstarPathNode> grid;
     public int x;
     public int y;
 
@@ -19,10 +19,10 @@ public class PathNode {
     public bool isWalkable;
 
     //Von welcher Node ist man gekommen
-    public PathNode cameFromNode;
+    public AstarPathNode cameFromNode;
 
     //Generic für Astar_search
-    public PathNode(Grid<PathNode> grid, int x, int y) {
+    public AstarPathNode(Grid<AstarPathNode> grid, int x, int y) {
         this.grid = grid;
         this.x = x;
         this.y = y;
