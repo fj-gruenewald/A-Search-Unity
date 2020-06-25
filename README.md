@@ -1,2 +1,3 @@
 # A* search in Unity
- A* search in Unity
+This Project got reused in a new Repository and is closed now...
+https://github.com/fj-gruenewald/Pathfinding-Algorithms-in-Unity
